@@ -1,0 +1,58 @@
+package game.enemyfollow;
+
+import base.GameObject;
+import base.GameObjectManager;
+import base.Vector2D;
+import game.player.BulletPlayer;
+import game.player.Player;
+import physic.BoxCollider;
+import physic.PhysicBody;
+import physic.RunHitObject;
+import renderer.ImageRenderer;
+
+public class EnemyFollow extends GameObject implements PhysicBody {
+
+    public Vector2D velocity;
+
+    public BoxCollider boxCollider;
+
+    private RunHitObject runHitObject;
+    public EnemyFollow() {
+        this.velocity = new Vector2D();
+        this.renderer = new ImageRenderer("resources-rocket-master/resources/images/star.png", 20, 20);
+        this.boxCollider = new BoxCollider(20, 20);
+        this.runHitObject = new RunHitObject(
+                BulletPlayer.class
+        );
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        this.position.addUp(this.velocity);
+
+        this.boxCollider.position.set(this.position.x - 10, this.position.y - 10);
+
+        runHitObject.run(this);
+        Player player = GameObjectManager.instance.findPlayer();
+        if (player != null) {
+            this.update(player.position);
+        }
+    }
+
+    private void update(Vector2D position) {
+        this.velocity.set(
+                position.subtract(this.position).normalized()
+        ).multiply(1.5f);
+    }
+
+    @Override
+    public void getHit(GameObject gameObject) {
+        this.isAlive = false;
+    }
+
+    @Override
+    public BoxCollider getBoxCollider() {
+        return this.boxCollider;
+    }
+}
